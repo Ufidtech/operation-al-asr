@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYS-LOG-AUDIT // Temporal Protocol</title>
+    <style>
+        /* Global & Reset */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #050505; }
+        
+        /* Phase 1: Hacker Terminal */
+        #terminal-phase {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #050505; color: #0f0;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 2rem; display: flex; flex-direction: column;
+            z-index: 10; transition: opacity 2s ease-in-out;
+        }
+        .alert-box { border: 2px solid red; padding: 1rem; margin-bottom: 2rem; text-align: center; background: rgba(255, 0, 0, 0.1); }
+        .red-text { color: red; font-weight: bold; font-size: 1.2rem; animation: blink 1s infinite; }
+        .log-line { margin-bottom: 0.5rem; opacity: 0.8; }
+        .input-line { margin-top: auto; display: flex; gap: 10px; font-size: 1.1rem; }
+        #override-input {
+            background: transparent; border: none; color: #0f0; font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1rem; outline: none; width: 100%; text-transform: uppercase;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* Phase 2: Peaceful Reveal */
+        #peace-phase {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #0a1128 0%, #010308 100%);
+            color: #e0e0e0; font-family: 'Georgia', serif;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 2rem; opacity: 0; pointer-events: none; z-index: 1;
+            transition: opacity 3s ease-in-out; overflow-y: auto;
+        }
+        .stars {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: transparent; z-index: 0; pointer-events: none;
+            background-image: radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)), radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)), radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)), radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0));
+            background-repeat: repeat; background-size: 200px 200px;
+            animation: drift 100s linear infinite; opacity: 0.3;
+        }
+        @keyframes drift { from { transform: translateY(0); } to { transform: translateY(-200px); } }
+
+        .content-box { z-index: 2; max-width: 700px; text-align: center; }
+        .arabic { font-size: 2.5rem; color: #d4af37; margin-bottom: 1rem; direction: rtl; line-height: 1.6; }
+        .translation { font-size: 1.2rem; font-style: italic; color: #b0b0b0; margin-bottom: 3rem; }
+        .letter { font-size: 1.1rem; line-height: 1.8; text-align: left; color: #e0e0e0; border-top: 1px solid rgba(212, 175, 55, 0.3); padding-top: 2rem; }
+        .hidden { display: none !important; }
+        .fade-in { opacity: 1 !important; pointer-events: auto !important; }
+        .fade-out { opacity: 0 !important; pointer-events: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- PHASE 1: The Hack -->
+    <div id="terminal-phase">
+        <div class="alert-box">
+            <p class="red-text">CRITICAL SYSTEM ALERT: SEVERE CHRONOLOGICAL DEPLETION</p>
+        </div>
+        <div id="logs">
+            <p class="log-line">> ANALYZING TARGET: SECURE_AGENT_FEMALE</p>
+            <p class="log-line">> FETCHING AGE_VARIABLE... [ERROR: ENCRYPTION TOO STRONG]</p>
+            <p class="log-line" style="color: yellow;">> WARNING: TARGET AGE IS HIGHLY CLASSIFIED. BYPASSING...</p>
+            <p class="log-line">> STATUS: PREVIOUS UPTIME EXPIRED. SYSTEM RESET IMMINENT.</p>
+        </div>
+        <div class="input-line">
+            <span>> ENTER_OVERRIDE_DATE (DD/MM):</span>
+            <input type="text" id="override-input" autocomplete="off" autofocus>
+        </div>
+    </div>
+
+    <!-- PHASE 2: The Reveal -->
+    <div id="peace-phase">
+        <div class="stars"></div>
+        <div class="content-box">
+            <div id="verse-container" style="opacity: 0; transition: opacity 2s;">
+                <p class="arabic">وَالْعَصْرِ (١) إِنَّ الْإِنسَانَ لَفِي خُسْرٍ (٢) إِلَّا الَّذِينَ آمَنُوا وَعَمِلُوا الصَّالِحَاتِ وَتَوَاصَوْا بِالْحَقِّ وَتَوَاصَوْا بِالصَّبْرِ (٣)</p>
+                <p class="translation">"By time, Indeed, mankind is in loss, Except for those who have believed and done righteous deeds and advised each other to truth and advised each other to patience."</p>
+            </div>
+            
+            <div id="letter-container" class="letter" style="opacity: 0; transition: opacity 3s;">
+                <p id="typed-letter"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // The Letter Content
+        const personalLetter = `In a world obsessed with finding vulnerabilities and securing networks, you are one of the most secure and pure-hearted people I know. 
+
+I might not have the decryption key to figure out exactly how old you are today (your OPSEC is too good), but I do know that with every passing year, your "uptime" brings joy to everyone around you.
+
+As another year passes, Surah Al-Asr is a beautiful reminder that the only true way to secure our future is through faith, good deeds, and the Sabr (patience) we share with one another. I am so proud of how hard you are working on your IT, and even prouder to call you my friend. 
+
+Happy Birthday.`;
+
+        const terminalPhase = document.getElementById('terminal-phase');
+        const peacePhase = document.getElementById('peace-phase');
+        const overrideInput = document.getElementById('override-input');
+        const verseContainer = document.getElementById('verse-container');
+        const letterContainer = document.getElementById('letter-container');
+        const typedLetterElement = document.getElementById('typed-letter');
+
+        // Check offline persistence
+        if (localStorage.getItem('alAsrUnlocked') === 'true') {
+            triggerPeacePhase(0);
+        }
+
+        // Listen for the "hack" input
+        overrideInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const val = overrideInput.value.toLowerCase().trim();
+                // Accepts variations of August 5th
+                if (val.includes('5') && (val.includes('8') || val.includes('aug'))) {
+                    localStorage.setItem('alAsrUnlocked', 'true');
+                    triggerPeacePhase(1500);
+                } else {
+                    overrideInput.value = '';
+                    overrideInput.placeholder = 'ACCESS DENIED. HINT: BIRTHDATE?';
+                }
+            }
+        });
+
+        function triggerPeacePhase(delay) {
+            terminalPhase.classList.add('fade-out');
+            
+            setTimeout(() => {
+                terminalPhase.classList.add('hidden');
+                peacePhase.classList.add('fade-in');
+                
+                // Fade in verse
+                setTimeout(() => {
+                    verseContainer.style.opacity = '1';
+                }, 1000);
+
+                // Type out the letter
+                setTimeout(() => {
+                    letterContainer.style.opacity = '1';
+                    typeWriter(personalLetter, 0);
+                }, 4000);
+
+            }, delay);
+        }
+
+        function typeWriter(text, i) {
+            if (i < text.length) {
+                typedLetterElement.innerHTML += text.charAt(i) === '\n' ? '<br>' : text.charAt(i);
+                setTimeout(() => typeWriter(text, i + 1), 40); // Typing speed
+            }
+        }
+    </script>
+</body>
+</html>

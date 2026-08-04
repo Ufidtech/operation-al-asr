@@ -1,157 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYS-LOG-AUDIT // Temporal Protocol</title>
-    <style>
-        /* Global & Reset */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #050505; }
-        
-        /* Phase 1: Hacker Terminal */
-        #terminal-phase {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #050505; color: #0f0;
-            font-family: 'Courier New', Courier, monospace;
-            padding: 2rem; display: flex; flex-direction: column;
-            z-index: 10; transition: opacity 2s ease-in-out;
-        }
-        .alert-box { border: 2px solid red; padding: 1rem; margin-bottom: 2rem; text-align: center; background: rgba(255, 0, 0, 0.1); }
-        .red-text { color: red; font-weight: bold; font-size: 1.2rem; animation: blink 1s infinite; }
-        .log-line { margin-bottom: 0.5rem; opacity: 0.8; }
-        .input-line { margin-top: auto; display: flex; gap: 10px; font-size: 1.1rem; }
-        #override-input {
-            background: transparent; border: none; color: #0f0; font-family: 'Courier New', Courier, monospace;
-            font-size: 1.1rem; outline: none; width: 100%; text-transform: uppercase;
-        }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYS-LOG-AUDIT // Temporal Protocol</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#050607;
+    --void-deep:#010308;
+    --navy:#0a1128;
+    --gold:#d4af37;
+    --gold-dim:#8a712a;
+    --alert:#ff3b3b;
+    --rose:#c8102e;
+    --rose-deep:#8c0c22;
+    --green:#3dff6a;
+    --ink:#e8e6e1;
+    --muted:#9a988f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:100%;min-height:100%;background:var(--void);}
+  body{overflow-x:hidden;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
 
-        /* Phase 2: Peaceful Reveal */
-        #peace-phase {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #0a1128 0%, #010308 100%);
-            color: #e0e0e0; font-family: 'Georgia', serif;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 2rem; opacity: 0; pointer-events: none; z-index: 1;
-            transition: opacity 3s ease-in-out; overflow-y: auto;
-        }
-        .stars {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: transparent; z-index: 0; pointer-events: none;
-            background-image: radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)), radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)), radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)), radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0));
-            background-repeat: repeat; background-size: 200px 200px;
-            animation: drift 100s linear infinite; opacity: 0.3;
-        }
-        @keyframes drift { from { transform: translateY(0); } to { transform: translateY(-200px); } }
+  /* ============ PHASE 1: TERMINAL ============ */
+  #terminal-phase{
+    position:fixed; inset:0; width:100%; min-height:100vh;
+    background:var(--void); color:var(--green);
+    font-family:'JetBrains Mono', 'Courier New', monospace;
+    padding:6vh 5vw; display:flex; flex-direction:column;
+    z-index:10; transition:opacity 1.6s ease-in-out;
+  }
+  .scanlines{
+    position:fixed; inset:0; pointer-events:none; z-index:11; opacity:0.06;
+    background:repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 3px);
+  }
+  .alert-box{
+    border:1px solid var(--alert); padding:1rem 1.25rem; margin-bottom:1.5rem;
+    background:rgba(255,59,59,0.06); border-radius:2px;
+  }
+  .alert-title{color:var(--alert); font-weight:700; font-size:clamp(0.95rem,3vw,1.3rem); letter-spacing:0.5px; animation:blink 1.1s infinite;}
+  .alert-sub{color:var(--muted); font-size:0.8rem; margin-top:0.35rem;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.25;}}
 
-        .content-box { z-index: 2; max-width: 700px; text-align: center; }
-        .arabic { font-size: 2.5rem; color: #d4af37; margin-bottom: 1rem; direction: rtl; line-height: 1.6; }
-        .translation { font-size: 1.2rem; font-style: italic; color: #b0b0b0; margin-bottom: 3rem; }
-        .letter { font-size: 1.1rem; line-height: 1.8; text-align: left; color: #e0e0e0; border-top: 1px solid rgba(212, 175, 55, 0.3); padding-top: 2rem; }
-        .hidden { display: none !important; }
-        .fade-in { opacity: 1 !important; pointer-events: auto !important; }
-        .fade-out { opacity: 0 !important; pointer-events: none !important; }
-    </style>
+  #logs{font-size:clamp(0.75rem,2.4vw,0.95rem); line-height:1.9; max-width:640px;}
+  .log-line{opacity:0; animation:fadeUp 0.5s forwards;}
+  .log-line.warn{color:#ffd23d;}
+  .log-line.err{color:var(--alert);}
+  @keyframes fadeUp{from{opacity:0; transform:translateY(4px);} to{opacity:0.9; transform:translateY(0);}}
+
+  /* fake decryption bar for the age gag */
+  #decrypt-wrap{margin-top:1.4rem; font-size:0.78rem; opacity:0; max-width:640px;}
+  #decrypt-track{
+    width:100%; max-width:320px; height:8px; border:1px solid var(--gold-dim);
+    margin:0.5rem 0; overflow:hidden; background:rgba(212,175,55,0.05);
+  }
+  #decrypt-fill{height:100%; width:0%; background:var(--gold); transition:width 0.15s linear;}
+  #decrypt-status{color:var(--gold); letter-spacing:0.5px;}
+
+  .cert-box{
+    margin-top:1.6rem; border:1px dashed var(--gold-dim); padding:0.85rem 1rem;
+    font-size:0.72rem; color:var(--gold); max-width:340px; opacity:0;
+    background:rgba(212,175,55,0.03);
+  }
+  .cert-box div{margin-bottom:0.2rem;}
+
+  .input-line{margin-top:auto; padding-top:2rem; display:flex; align-items:center; gap:10px; font-size:clamp(0.85rem,2.8vw,1.05rem); flex-wrap:wrap;}
+  #override-input{
+    background:transparent; border:none; border-bottom:1px solid var(--green);
+    color:var(--green); font-family:inherit; font-size:inherit; outline:none;
+    flex:1; min-width:160px; text-transform:uppercase; padding:0.3rem 0;
+  }
+  #hint-line{font-size:0.72rem; color:var(--muted); margin-top:0.6rem; min-height:1.2em;}
+
+  /* ============ PHASE 2: REVEAL ============ */
+  #peace-phase{
+    position:fixed; inset:0; width:100%; min-height:100vh;
+    background:radial-gradient(circle at 50% 30%, var(--navy) 0%, var(--void-deep) 75%);
+    color:var(--ink); font-family:'Cormorant Garamond', Georgia, serif;
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+    padding:8vh 5vw 10vh; opacity:0; pointer-events:none; z-index:1;
+    transition:opacity 2.4s ease-in-out; overflow-y:auto;
+  }
+
+  .stars{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      radial-gradient(1.5px 1.5px at 10% 20%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 80% 10%, #fff, transparent),
+      radial-gradient(1px 1px at 40% 60%, #eee, transparent),
+      radial-gradient(1.5px 1.5px at 65% 80%, #fff, transparent),
+      radial-gradient(1px 1px at 25% 85%, #ddd, transparent),
+      radial-gradient(1.5px 1.5px at 90% 55%, #fff, transparent),
+      radial-gradient(1px 1px at 55% 15%, #eee, transparent);
+    background-repeat:repeat; background-size:600px 600px;
+    animation:drift 200s linear infinite; opacity:0.6;
+  }
+  @keyframes drift{from{transform:translateY(0);} to{transform:translateY(-600px);}}
+
+  /* real Islamic geometric pattern, tiled SVG, very faint */
+  .geo-pattern{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    opacity:0.16; mix-blend-mode:screen;
+    background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23d4af37' stroke-width='0.7'%3E%3Cpolygon points='60,6 74,32 103,32 84,54 92,86 60,70 28,86 36,54 17,32 46,32'/%3E%3Ccircle cx='60' cy='60' r='40' /%3E%3Ccircle cx='0' cy='0' r='40'/%3E%3Ccircle cx='120' cy='0' r='40'/%3E%3Ccircle cx='0' cy='120' r='40'/%3E%3Ccircle cx='120' cy='120' r='40'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:220px 220px;
+    animation:geo-spin 240s linear infinite;
+    transform-origin:center;
+  }
+  @keyframes geo-spin{from{transform:rotate(0deg) scale(1.4);} to{transform:rotate(360deg) scale(1.4);}}
+
+  /* ambient scattered flowers, fixed, very low opacity, purely atmospheric */
+  .flower-scatter{position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0.85;}
+  .flower-scatter svg{position:absolute; opacity:0.1;}
+  .fs1{top:8%; left:6%; width:70px; transform:rotate(-12deg);}
+  .fs2{top:65%; left:88%; width:90px; transform:rotate(20deg);}
+  .fs3{top:82%; left:12%; width:55px; transform:rotate(8deg);}
+  .fs4{top:20%; left:92%; width:50px; transform:rotate(-25deg);}
+
+  /* the two hero blooms: one by the dedication, one before the signature */
+  .flower-bloom{width:56px; height:56px; margin:0 auto 1.2rem; opacity:0; transform:scale(0.2) rotate(-20deg); transition:transform 1.4s cubic-bezier(.34,1.56,.64,1), opacity 1s ease;}
+  .flower-bloom.in-view{opacity:1; transform:scale(1) rotate(0deg);}
+
+  .content-box{position:relative; z-index:2; max-width:680px; width:100%; text-align:center; padding-bottom:12vh;}
+
+  /* scroll-reveal system: every block starts hidden+lowered, .in-view animates it in */
+  .reveal{opacity:0; transform:translateY(36px); transition:opacity 1.1s ease, transform 1.1s ease;}
+  .reveal.in-view{opacity:1; transform:translateY(0);}
+
+  .scroll-hint{
+    margin:0 auto 8vh; color:var(--gold-dim); font-size:0.7rem; letter-spacing:2px;
+    display:flex; flex-direction:column; align-items:center; gap:0.5rem; opacity:0.8;
+  }
+  .scroll-hint .chev{font-size:1.1rem; animation:bob 1.6s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0);opacity:0.4;}50%{transform:translateY(8px);opacity:1;}}
+
+  .dedication{color:var(--gold); font-size:1.05rem; letter-spacing:1px; margin-bottom:1rem; font-style:italic;}
+  .bismillah{color:var(--gold-dim); font-size:0.9rem; letter-spacing:2px; margin-bottom:4rem;}
+
+  #verse-container{margin-bottom:6vh;}
+  .arabic{font-family:'Amiri', serif; font-size:clamp(1.6rem,5vw,2.6rem); color:var(--gold); margin-bottom:1.2rem; direction:rtl; line-height:1.9;}
+  .translation{font-size:clamp(1rem,3vw,1.2rem); font-style:italic; color:var(--muted); line-height:1.7; margin-bottom:0.6rem;}
+  .reference{font-size:0.8rem; color:var(--gold-dim); letter-spacing:1px;}
+
+  #bridge-container{max-width:560px; margin:0 auto 8vh; font-size:1rem; color:var(--muted); line-height:1.8; font-style:italic;}
+  #bridge-container .ttl-tag{
+    display:inline-block; font-family:'JetBrains Mono', monospace; font-size:0.68rem;
+    color:var(--gold); border:1px solid var(--gold-dim); padding:0.1rem 0.4rem; border-radius:2px; margin:0 0.15rem;
+  }
+
+  .letter-wrap{border-top:1px solid rgba(212,175,55,0.25); padding-top:3rem; margin-bottom:6vh;}
+  .letter-para{
+    font-size:clamp(1.05rem,3vw,1.25rem); line-height:2; text-align:left; color:var(--ink);
+    margin-bottom:2.2rem; white-space:pre-wrap;
+  }
+  .letter-para:last-of-type{margin-bottom:0;}
+  .letter-para.signature{color:var(--gold); font-size:clamp(1.15rem,3.4vw,1.4rem); text-align:center; margin-top:1rem;}
+
+  .petal-a{fill:var(--rose);}
+  .petal-b{fill:var(--rose-deep);}
+  .fcenter{fill:var(--gold);}
+
+  .sound-toggle{
+    position:fixed; top:3vh; right:5vw; z-index:5; width:40px; height:40px;
+    border:1px solid var(--gold-dim); background:rgba(10,17,40,0.5); border-radius:50%;
+    color:var(--gold); font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    opacity:0; transition:opacity 1s ease;
+  }
+  .sound-toggle.visible{opacity:0.85;}
+  .sound-toggle:hover{opacity:1;}
+
+  .age-plate{
+    margin:0 auto 4vh; max-width:340px; font-family:'JetBrains Mono', monospace; font-size:0.72rem;
+    color:var(--gold-dim); border:1px dashed rgba(212,175,55,0.3); padding:0.7rem 1rem;
+  }
+
+  .hidden{display:none !important;}
+  .fade-out{opacity:0 !important; pointer-events:none !important;}
+  .fade-in{opacity:1 !important; pointer-events:auto !important;}
+
+  ::selection{background:var(--gold); color:#000;}
+</style>
 </head>
 <body>
 
-    <!-- PHASE 1: The Hack -->
-    <div id="terminal-phase">
-        <div class="alert-box">
-            <p class="red-text">CRITICAL SYSTEM ALERT: SEVERE CHRONOLOGICAL DEPLETION</p>
-        </div>
-        <div id="logs">
-            <p class="log-line">> ANALYZING TARGET: SECURE_AGENT_FEMALE</p>
-            <p class="log-line">> FETCHING AGE_VARIABLE... [ERROR: ENCRYPTION TOO STRONG]</p>
-            <p class="log-line" style="color: yellow;">> WARNING: TARGET AGE IS HIGHLY CLASSIFIED. BYPASSING...</p>
-            <p class="log-line">> STATUS: PREVIOUS UPTIME EXPIRED. SYSTEM RESET IMMINENT.</p>
-        </div>
-        <div class="input-line">
-            <span>> ENTER_OVERRIDE_DATE (DD/MM):</span>
-            <input type="text" id="override-input" autocomplete="off" autofocus>
-        </div>
+<!-- ============ PHASE 1: THE HACK ============ -->
+<div id="terminal-phase">
+  <div class="scanlines"></div>
+  <div class="alert-box">
+    <div class="alert-title">CRITICAL SYSTEM ALERT — TTL EXPIRATION IMMINENT</div>
+    <div class="alert-sub">SESSION: SECURE_AGENT // TARGET: [REDACTED] // PRIORITY: MAXIMUM</div>
+  </div>
+
+  <div id="logs"></div>
+
+  <div id="decrypt-wrap">
+    <div id="decrypt-status">> RESOLVING FIELD: AGE_VARIABLE ...</div>
+    <div id="decrypt-track"><div id="decrypt-fill"></div></div>
+  </div>
+
+  <div class="cert-box">
+    <div>SSL_CERT :: TIME_TO_LIVE</div>
+    <div>ISSUED &nbsp;&nbsp;: 05-08-XXXX</div>
+    <div>EXPIRES &nbsp;: NEVER (RENEWED BY DEEDS)</div>
+    <div>STATUS &nbsp;&nbsp;: AWAITING OVERRIDE</div>
+  </div>
+
+  <div class="input-line">
+    <span>&gt; ENTER_OVERRIDE (BIRTH DATE):</span>
+    <input type="text" id="override-input" autocomplete="off" autofocus placeholder="DD MONTH">
+  </div>
+  <div id="hint-line"></div>
+</div>
+
+<!-- ============ PHASE 2: THE REVEAL ============ -->
+<button id="sound-toggle" class="sound-toggle" aria-label="Toggle nasheed" title="Toggle sound">🔇</button>
+<audio id="nasheed-audio" src="nasheed.mp3" loop preload="none"></audio>
+
+<div id="peace-phase">
+  <div class="stars"></div>
+  <div class="geo-pattern"></div>
+
+  <!-- ambient flowers, fixed, purely atmospheric -->
+  <div class="flower-scatter">
+    <svg class="fs1" viewBox="0 0 100 100"><g><ellipse class="petal-a" cx="50" cy="26" rx="13" ry="22"/><ellipse class="petal-b" cx="50" cy="26" rx="13" ry="22" transform="rotate(72 50 50)"/><ellipse class="petal-a" cx="50" cy="26" rx="13" ry="22" transform="rotate(144 50 50)"/><ellipse class="petal-b" cx="50" cy="26" rx="13" ry="22" transform="rotate(216 50 50)"/><ellipse class="petal-a" cx="50" cy="26" rx="13" ry="22" transform="rotate(288 50 50)"/><circle class="fcenter" cx="50" cy="50" r="10"/></g></svg>
+    <svg class="fs2" viewBox="0 0 100 100"><g><ellipse class="petal-a" cx="50" cy="26" rx="13" ry="22"/><ellipse class="petal-b" cx="50" cy="26" rx="13" ry="22" transform="rotate(72 50 50)"/><ellipse class="petal-a" cx="50" cy="26" rx="13" ry="22" transform="rotate(144 50 50)"/><ellipse class="petal-b" cx="50" cy="26" rx="13" ry="22" transform="rotate(216 50 50)"/><ellipse class="petal-a" cx="50" cy="26" rx="13" ry="22" transform="rotate(288 50 50)"/><circle class="fcenter" cx="50" cy="50" r="10"/></g></svg>
+    <svg class="fs3" viewBox="0 0 100 100"><g><ellipse class="petal-a" cx="50" cy="26" rx="13" ry="22"/><ellipse class="petal-b" cx="50" cy="26" rx="13" ry="22" transform="rotate(72 50 50)"/><ellipse class="petal-a" cx="50" cy="26" rx="13" ry="22" transform="rotate(144 50 50)"/><ellipse class="petal-b" cx="50" cy="26" rx="13" ry="22" transform="rotate(216 50 50)"/><ellipse class="petal-a" cx="50" cy="26" rx="13" ry="22" transform="rotate(288 50 50)"/><circle class="fcenter" cx="50" cy="50" r="10"/></g></svg>
+    <svg class="fs4" viewBox="0 0 100 100"><g><ellipse class="petal-a" cx="50" cy="26" rx="13" ry="22"/><ellipse class="petal-b" cx="50" cy="26" rx="13" ry="22" transform="rotate(72 50 50)"/><ellipse class="petal-a" cx="50" cy="26" rx="13" ry="22" transform="rotate(144 50 50)"/><ellipse class="petal-b" cx="50" cy="26" rx="13" ry="22" transform="rotate(216 50 50)"/><ellipse class="petal-a" cx="50" cy="26" rx="13" ry="22" transform="rotate(288 50 50)"/><circle class="fcenter" cx="50" cy="50" r="10"/></g></svg>
+  </div>
+
+  <div class="content-box">
+    <svg class="flower-bloom reveal" viewBox="0 0 100 100"><g><ellipse class="petal-a" cx="50" cy="26" rx="13" ry="22"/><ellipse class="petal-b" cx="50" cy="26" rx="13" ry="22" transform="rotate(72 50 50)"/><ellipse class="petal-a" cx="50" cy="26" rx="13" ry="22" transform="rotate(144 50 50)"/><ellipse class="petal-b" cx="50" cy="26" rx="13" ry="22" transform="rotate(216 50 50)"/><ellipse class="petal-a" cx="50" cy="26" rx="13" ry="22" transform="rotate(288 50 50)"/><circle class="fcenter" cx="50" cy="50" r="11"/></g></svg>
+    <div class="dedication reveal">For Zulaiha Adamu</div>
+    <div class="bismillah reveal">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+
+    <div class="scroll-hint reveal">
+      <span>scroll</span>
+      <span class="chev">⌄</span>
     </div>
 
-    <!-- PHASE 2: The Reveal -->
-    <div id="peace-phase">
-        <div class="stars"></div>
-        <div class="content-box">
-            <div id="verse-container" style="opacity: 0; transition: opacity 2s;">
-                <p class="arabic">وَالْعَصْرِ (١) إِنَّ الْإِنسَانَ لَفِي خُسْرٍ (٢) إِلَّا الَّذِينَ آمَنُوا وَعَمِلُوا الصَّالِحَاتِ وَتَوَاصَوْا بِالْحَقِّ وَتَوَاصَوْا بِالصَّبْرِ (٣)</p>
-                <p class="translation">"By time, Indeed, mankind is in loss, Except for those who have believed and done righteous deeds and advised each other to truth and advised each other to patience."</p>
-            </div>
-            
-            <div id="letter-container" class="letter" style="opacity: 0; transition: opacity 3s;">
-                <p id="typed-letter"></p>
-            </div>
-        </div>
+    <div id="verse-container" class="reveal">
+      <p class="arabic">وَٱلْعَصْرِ ۝ إِنَّ ٱلْإِنسَـٰنَ لَفِى خُسْرٍ ۝ إِلَّا ٱلَّذِينَ ءَامَنُوا۟ وَعَمِلُوا۟ ٱلصَّـٰلِحَـٰتِ وَتَوَاصَوْا۟ بِٱلْحَقِّ وَتَوَاصَوْا۟ بِٱلصَّبْرِ</p>
+      <p class="translation">"By time. Indeed, mankind is in loss — except those who believe, do righteous deeds, and advise one another to truth and to patience."</p>
+      <p class="reference">— Surah Al-'Asr, 103:1–3</p>
     </div>
 
-    <script>
-        // The Letter Content
-        const personalLetter = `In a world obsessed with finding vulnerabilities and securing networks, you are one of the most secure and pure-hearted people I know. 
+    <div id="bridge-container" class="reveal">
+      Every system you protect runs on a <span class="ttl-tag">TTL</span> — a countdown, a reminder that nothing stays valid forever.
+      This surah is that same idea, older than any protocol: time itself is the packet that's always in transit.
+      What renews it isn't a patch or a reset — it's <span class="ttl-tag">faith</span>, <span class="ttl-tag">good work</span>, and <span class="ttl-tag">patience shared</span>.
+    </div>
 
-I might not have the decryption key to figure out exactly how old you are today (your OPSEC is too good), but I do know that with every passing year, your "uptime" brings joy to everyone around you.
+    <div class="letter-wrap" id="letter-wrap"><!-- paragraphs injected by JS, each as its own .reveal block --></div>
 
-As another year passes, Surah Al-Asr is a beautiful reminder that the only true way to secure our future is through faith, good deeds, and the Sabr (patience) we share with one another. I am so proud of how hard you are working on your IT, and even prouder to call you my friend. 
+    <div class="age-plate reveal">FIELD: AGE_VARIABLE<br>VALUE: CLASSIFIED_BY_DESIGN<br>NOTE: some encryption isn't meant to be broken — happy birthday anyway.</div>
+  </div>
+</div>
 
-Happy Birthday.`;
+<script>
+(function(){
+  "use strict";
 
-        const terminalPhase = document.getElementById('terminal-phase');
-        const peacePhase = document.getElementById('peace-phase');
-        const overrideInput = document.getElementById('override-input');
-        const verseContainer = document.getElementById('verse-container');
-        const letterContainer = document.getElementById('letter-container');
-        const typedLetterElement = document.getElementById('typed-letter');
+  // letter, broken into paragraphs so each one animates in separately on scroll
+  const letterParagraphs = [
+    "Zulaiha,",
+    "In a world obsessed with finding vulnerabilities and securing networks, you're one of the most secure, pure-hearted people I know.",
+    "I still remember when you messaged me for a past question — you were in 300L, I was only in 200L, but you were dead sure I was in 100L and figured a fresher would definitely still have it lying around. I didn't. Funny how it worked out anyway: not long after, we ended up on the same team regardless — you as Sis Sec and me as Gen Sec of AMICS, no seniority chart required.",
+    "That's kind of who you are, though. Someone people trust to have the answer, even when you're figuring it out right alongside them. I've watched that same quiet capability carry you through cybersecurity, through your IT placement, through everything you've had to work out on your own — with nobody handing you the past questions this time.",
+    "I don't have the decryption key to your exact age — your OPSEC on that front is genuinely flawless — but I know that with every year that passes, your \"uptime\" has only made things better for the people around you. Me included.",
+    "Surah Al-'Asr is the reminder underneath all of this: the only real way to secure a life against loss isn't a firewall, it's faith, good deeds, and the patience we owe each other. I'm proud of you, Zulaiha — more than a mistaken PQ request could've ever predicted.",
+    "Happy birthday. May this year renew you the way nothing else can.",
+    "You said it yourself, without even meaning to — \"kawai Zulai of yesterday.\" That's not something to be scared of. That's Al-'Asr. There's no more Zulai of yesterday because Allah already renewed her — into Zulai of today, and whoever she's becoming next. That's not loss. That's the whole point."
+  ];
 
-        // Check offline persistence
-        if (localStorage.getItem('alAsrUnlocked') === 'true') {
-            triggerPeacePhase(0);
-        }
+  const FLOWER_SVG = '<svg class="flower-bloom reveal" viewBox="0 0 100 100"><g><ellipse class="petal-a" cx="50" cy="26" rx="13" ry="22"/><ellipse class="petal-b" cx="50" cy="26" rx="13" ry="22" transform="rotate(72 50 50)"/><ellipse class="petal-a" cx="50" cy="26" rx="13" ry="22" transform="rotate(144 50 50)"/><ellipse class="petal-b" cx="50" cy="26" rx="13" ry="22" transform="rotate(216 50 50)"/><ellipse class="petal-a" cx="50" cy="26" rx="13" ry="22" transform="rotate(288 50 50)"/><circle class="fcenter" cx="50" cy="50" r="11"/></g></svg>';
 
-        // Listen for the "hack" input
-        overrideInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const val = overrideInput.value.toLowerCase().trim();
-                // Accepts variations of August 5th
-                if (val.includes('5') && (val.includes('8') || val.includes('aug'))) {
-                    localStorage.setItem('alAsrUnlocked', 'true');
-                    triggerPeacePhase(1500);
-                } else {
-                    overrideInput.value = '';
-                    overrideInput.placeholder = 'ACCESS DENIED. HINT: BIRTHDATE?';
-                }
-            }
+  const letterWrap = document.getElementById('letter-wrap');
+  letterParagraphs.forEach((para, idx) => {
+    const isSignature = idx === letterParagraphs.length - 1;
+    if(isSignature){
+      // a bloom marks the turn into the closing line
+      const flowerHolder = document.createElement('div');
+      flowerHolder.innerHTML = FLOWER_SVG;
+      letterWrap.appendChild(flowerHolder.firstElementChild);
+    }
+    const p = document.createElement('p');
+    p.className = 'letter-para reveal' + (isSignature ? ' signature' : '');
+    p.textContent = para;
+    letterWrap.appendChild(p);
+  });
+
+  const terminalPhase = document.getElementById('terminal-phase');
+  const peacePhase = document.getElementById('peace-phase');
+  const overrideInput = document.getElementById('override-input');
+  const logs = document.getElementById('logs');
+  const decryptWrap = document.getElementById('decrypt-wrap');
+  const decryptFill = document.getElementById('decrypt-fill');
+  const decryptStatus = document.getElementById('decrypt-status');
+  const certBox = document.querySelector('.cert-box');
+  const hintLine = document.getElementById('hint-line');
+  const soundToggle = document.getElementById('sound-toggle');
+  const nasheedAudio = document.getElementById('nasheed-audio');
+  let audioEnabled = true;
+
+  soundToggle.addEventListener('click', function(){
+    audioEnabled = !audioEnabled;
+    if(audioEnabled){
+      nasheedAudio.play().catch(()=>{ /* file may be missing or blocked, fail quietly */ });
+      soundToggle.textContent = '🔊';
+    } else {
+      nasheedAudio.pause();
+      soundToggle.textContent = '🔇';
+    }
+  });
+
+  const bootLines = [
+    { text: '> ANALYZING TARGET: SECURE_AGENT (CYBERSECURITY DIVISION)', cls: '' },
+    { text: '> FETCHING FIELD: AGE_VARIABLE ...', cls: '' },
+    { text: '> ERROR: ENCRYPTION STRENGTH EXCEEDS ALL KNOWN STANDARDS', cls: 'err' },
+    { text: '> ...she really never told anyone. respect.', cls: 'warn' },
+    { text: '> STATUS: PREVIOUS UPTIME EXPIRED. AWAITING OVERRIDE.', cls: '' },
+  ];
+
+  function typeLogLines(i){
+    if(i >= bootLines.length){
+      runDecryptGag();
+      return;
+    }
+    const p = document.createElement('p');
+    p.className = 'log-line ' + bootLines[i].cls;
+    p.textContent = bootLines[i].text;
+    p.style.animationDelay = '0s';
+    logs.appendChild(p);
+    setTimeout(()=>typeLogLines(i+1), 650);
+  }
+
+  // the "age is unbreakably encrypted" gag: bar climbs to 99% then stalls forever
+  function runDecryptGag(){
+    decryptWrap.style.transition = 'opacity 0.6s ease';
+    decryptWrap.style.opacity = '1';
+    let pct = 0;
+    const timer = setInterval(()=>{
+      if(pct < 99){
+        pct += Math.random() * 6;
+        pct = Math.min(pct, 99);
+        decryptFill.style.width = pct.toFixed(0) + '%';
+        decryptStatus.textContent = '> RESOLVING FIELD: AGE_VARIABLE ... ' + pct.toFixed(0) + '%';
+      } else {
+        clearInterval(timer);
+        decryptStatus.textContent = '> AGE_VARIABLE: CLASSIFIED_BY_DESIGN (0x403 — NICE TRY)';
+        certBox.style.transition = 'opacity 0.8s ease';
+        certBox.style.opacity = '1';
+
+        // her own words, quoted straight — a second line under the decrypt result
+        const quoteLine = document.createElement('div');
+        quoteLine.style.marginTop = '0.6rem';
+        quoteLine.style.color = 'var(--gold-dim)';
+        quoteLine.style.fontStyle = 'italic';
+        quoteLine.textContent = '> LAST KNOWN TRANSMISSION: "kawai Zulai of yesterday"';
+        decryptWrap.appendChild(quoteLine);
+      }
+    }, 140);
+  }
+
+  // boot sequence
+  typeLogLines(0);
+
+  // returning visitor shortcut
+  if(localStorage.getItem('alAsrUnlocked') === 'true'){
+    soundToggle.classList.add('visible');
+    audioEnabled = false; // autoplay isn't allowed without a fresh gesture — she can tap to start it
+    triggerPeacePhase(0);
+  }
+
+  overrideInput.addEventListener('keypress', function(e){
+    if(e.key === 'Enter'){
+      const val = overrideInput.value.toLowerCase().replace(/[^a-z0-9]/g,'');
+      const isAugustFifth =
+        val.includes('5aug') || val.includes('aug5') ||
+        val.includes('0508') || val.includes('508') ||
+        (val.includes('5') && val.includes('08')) ||
+        (val.includes('5') && val.includes('august'));
+
+      if(isAugustFifth){
+        localStorage.setItem('alAsrUnlocked', 'true');
+        overrideInput.disabled = true;
+        hintLine.textContent = '> OVERRIDE ACCEPTED. DECRYPTING FUTURE...';
+        hintLine.style.color = 'var(--green)';
+        nasheedAudio.volume = 0.55;
+        nasheedAudio.play().then(()=>{
+          soundToggle.textContent = '🔊';
+        }).catch(()=>{
+          // autoplay blocked or file missing — leave the toggle as a manual play button
+          audioEnabled = false;
+          soundToggle.textContent = '🔇';
         });
+        soundToggle.classList.add('visible');
+        triggerPeacePhase(1400);
+      } else {
+        overrideInput.value = '';
+        const taunts = [
+          'ACCESS DENIED. HINT: WHEN DID THE CANDLES START?',
+          'INCORRECT. TRY DD MONTH FORMAT.',
+          'NEGATIVE. SYSTEM SUGGESTS: EARLY AUGUST...',
+          'DENIED. THIS ONE SHOULD BE EASY FOR YOU.'
+        ];
+        hintLine.textContent = '> ' + taunts[Math.floor(Math.random()*taunts.length)];
+        hintLine.style.color = 'var(--alert)';
+      }
+    }
+  });
 
-        function triggerPeacePhase(delay) {
-            terminalPhase.classList.add('fade-out');
-            
-            setTimeout(() => {
-                terminalPhase.classList.add('hidden');
-                peacePhase.classList.add('fade-in');
-                
-                // Fade in verse
-                setTimeout(() => {
-                    verseContainer.style.opacity = '1';
-                }, 1000);
+  function triggerPeacePhase(delay){
+    setTimeout(()=>{
+      terminalPhase.classList.add('fade-out');
+      setTimeout(()=>{
+        terminalPhase.classList.add('hidden');
+        peacePhase.classList.add('fade-in');
+        peacePhase.scrollTop = 0;
+        initScrollReveal();
+        // the very first block (dedication) reveals immediately, no need to scroll for that
+        setTimeout(()=>{
+          const first = document.querySelector('.reveal');
+          if(first) first.classList.add('in-view');
+        }, 400);
+      }, 1600);
+    }, delay);
+  }
 
-                // Type out the letter
-                setTimeout(() => {
-                    letterContainer.style.opacity = '1';
-                    typeWriter(personalLetter, 0);
-                }, 4000);
-
-            }, delay);
+  // scroll-triggered reveal: every .reveal block fades + slides up as it enters the viewport
+  function initScrollReveal(){
+    const targets = document.querySelectorAll('#peace-phase .reveal');
+    if(!('IntersectionObserver' in window)){
+      targets.forEach(el => el.classList.add('in-view'));
+      return;
+    }
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('in-view');
+          observer.unobserve(entry.target);
         }
-
-        function typeWriter(text, i) {
-            if (i < text.length) {
-                typedLetterElement.innerHTML += text.charAt(i) === '\n' ? '<br>' : text.charAt(i);
-                setTimeout(() => typeWriter(text, i + 1), 40); // Typing speed
-            }
-        }
-    </script>
+      });
+    }, { root: peacePhase, threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+    targets.forEach(el => observer.observe(el));
+  }
+})();
+</script>
 </body>
 </html>
